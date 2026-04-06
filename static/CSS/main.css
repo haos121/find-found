@@ -3,6 +3,7 @@
     padding: 0px;
 }
 
+
 header {
     display: flex;
     background-color: rgb(151, 142, 142);
@@ -28,11 +29,13 @@ header {
 }
 
 .main_body {
-    background-color: aqua;
-    width: 100%;
-    height: 90vh;
-
+    display: flex;
+    flex-wrap: wrap;
+    justify-items: center;
+    align-items: center;
 }
+
+
 .main_input {
     width: 50%;
     border: none;
@@ -41,31 +44,73 @@ header {
     height: 70%;
 }
 
-.product_card{
-    background-color: rgb(255, 0, 0);
-    width: 20%;
+.product_card {
+    width: 15%;
     display: flex;
     flex-direction: column;
     align-items: center;
     border-radius: 10px;
     margin: 10px;
-    
 }
 
-.product_picture{
+.product_picture {
     background-color: aliceblue;
     width: 90%;
     height: 30vh;
-}
-
-.product_price{
+    border-radius: 10px;
 
 }
 
-.product_description{
-    
+.product_price, .product_description {
+    font-size:1.7vw;
+    width: 100%;
+    padding-left: 20xp;
 }
 
-.add_to_basket_button{
+.add_to_basket_button {
+    width: 100%;
+    height: 30px;
+    border: none;
+    border-radius: 10px;
+    font-size: 20px;
+    transition: 0.4s;
+}
+
+
+.add_to_basket_button:hover {
+    color: rgb(255, 255, 255);
+    background-color: rgb(180, 180, 180);
+    transform:translateY(3px);
+    box-shadow: -5px -5px 5px 0 rgba(0, 0, 0, 0.178);
+}
+
+/* ===================================Sign In================================== */
+.login_card {
+    background: white;
+    border-radius: 8px;
+    width: 100%;
+    padding: 32px;
+    text-align: center;
+}
+h1 {
+    font-size: 28px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+
+.signin_btn {
+    width: 25%;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    color: black;
+    border: none;
+    border-radius: 6px;
 
 }

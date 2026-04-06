@@ -32,6 +32,10 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 def root():
     return FileResponse("pages/main.html")
 
+@app.get("/signin", tags=["lincs"])
+def root():
+    return FileResponse("pages/signin.html")
+
 
 # запуск веб приложения
 if __name__ == "__main__":
