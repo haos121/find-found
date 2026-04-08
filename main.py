@@ -30,11 +30,11 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # ссылки на все страницы
 @app.get("/", tags=["lincs"])
 def root():
-    return FileResponse("pages/main.html")
+    return FileResponse("static/test.html")
 
 @app.get("/signin", tags=["lincs"])
-def root():
-    return FileResponse("pages/signin.html")
+def root1():
+    return FileResponse("static/signin.html")
 
 
 # запуск веб приложения
