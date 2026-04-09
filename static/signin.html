@@ -5,27 +5,31 @@
     <title>Find & Foud</title>
     <!--подключение css файла с стилями-->
     <link rel="stylesheet" href="main.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 </head>
-<header>
-    <a href="" class="header_item">Find & Found</a>
-    <div style="display: flex; gap: 20px;">
-        <a href="/signin" class="header_item">sign in</a>
-        <a href="" class="header_item">basket</a>
-    </div>
-</header>
 <body>
-    <div class="login_card">
-        <h1>Sign In</h1>
-        <form id="loginForm">
-            <div class="input-group">
-                <input type="text" id="password" placeholder="Username" autocomplete="currect-password" required>
-            </div>
-            <div class="input-group">
-                <input type="password" id="password" placeholder="Password" autocomplete="current-password" required>
-            </div>
-            <button type="submit" class="signin_btn">Sign In</button>
+    <div class="wrapper">
+        <form action="">
+            <h1>Login</h1>
+        <div class="input_box">
+            <input type="text" placeholder="Username" required>
+            <i class='bx bxs-user'></i>
+        </div>
+        <div class="input_box">
+            <input type="password" placeholder="Password" required>
+            <i class='bx bxs-lock-alt' ></i>
+        </div>
+        <div class="remember">
+            <label for="checkbox">Запомнить</label>
+            <a href="#">Забыли пароль?</a>
+        </div>
+
+        <button type="submit" class="btn">Войти</button>
+
+        <div class="register_link">
+            <p>Нет аккаунта? <a href="#">Register</a></p>
+        </div>
         </form>
-</div>
     </div>
 </body>
 </html>
