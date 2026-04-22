@@ -1,28 +1,233 @@
-<!--создание HTML файла-->
+<!-- ==========================================
+     FIND & FOUND - ГЛАВНАЯ СТРАНИЦА
+     Отображение списка товаров с поиском
+     ========================================== -->
 <!DOCTYPE html>
-<!--язык страницы (опционально)-->
-<html lang="en">
-<!--тег head нужен для ключевой настройки страницы-->
+<html lang="ru">
 <head>
+    <!-- Мета-информация о странице -->
     <meta charset="UTF-8">
-    <title>Find & Foud</title>
-    <!--подключение css файла с стилями-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find & Found - Каталог товаров</title>
+    
+    <!-- Подключение CSS стилей -->
     <link rel="stylesheet" href="static/main.css">
 </head>
 <body>
+    <!-- НАВИГАЦИЯ И ЗАГОЛОВОК -->
     <header>
-        <a href="" class="header_item">Find & Found</a>
-        <input type="text" class="main_input" placeholder="Найти на Find & Found">
+        <!-- Логотип -->
+        <a href="/" class="header_item">Find & Found</a>
+        
+        <!-- ПОИСК ТОВАРОВ -->
+        <input type="text" id="searchInput" class="main_input" placeholder="Найти товар...">
+        
+        <!-- МЕНЮ НАВИГАЦИИ -->
         <div style="display: flex; gap: 20px;">
-            <a href="" class="header_item">sign in</a>
-            <a href="" class="header_item">basket</a>
+            <!-- Ссылка на вход (видна только незалогинным пользователям) -->
+            <a href="/signin" class="header_item" id="signin-link">Войти</a>
+            
+            <!-- Ссылка на корзину (видна только залогиненным) -->
+            <a href="/basket" class="header_item" id="basket-link" style="display: none;">🛒 Корзина</a>
+            
+            <!-- Ссылка на админ-панель (видна только администратору) -->
+            <a href="/admin" class="header_item" id="admin-link" style="display: none;">⚙️ Админ</a>
+            
+            <!-- Кнопка выхода (видна только залогиненным) -->
+            <a href="#" onclick="logout()" class="header_item" id="logout-link" style="display: none;">Выход</a>
         </div>
     </header>
-    <div class="product_card">
-        <img src="" alt="картинка" class="product_picture">
-        <div class="product_price">136$</div>
-        <div class="product_description">семейники</div>
-        <button class="add_to_basket_button">в корзину</button>
+
+    <!-- ОСНОВНОЙ КОНТЕНТ - ТОВАРЫ -->
+    <div class="main_body">
+        <!-- Здесь будут загружены товары через JavaScript -->
     </div>
+
+    <script>
+        // ===== ИНИЦИАЛИЗАЦИЯ СТРАНИЦЫ =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Загрузить все товары при загрузке страницы
+            loadProducts();
+            
+            // ===== ОБРАБОТЧИК ПОИСКА =====
+            // Фильтрует товары в реальном времени при вводе в поиск
+            document.getElementById('searchInput').addEventListener('input', function() {
+                const searchQuery = this.value;
+                
+                // Если поле пусто, загружаем все товары
+                if (searchQuery === '') {
+                    loadProducts();
+                    return;
+                }
+                
+                // Запрашиваем товары по поисковому запросу
+                fetch(`/api/products?search=${encodeURIComponent(searchQuery)}`)
+                .then(response => response.json())
+                .then(data => {
+                    const mainBody = document.querySelector('.main_body');
+                    
+                    // Генерируем HTML для каждого найденного товара
+                    mainBody.innerHTML = data.products.map(product => `
+                        <div class="product_card">
+                            <!-- Изображение товара -->
+                            <img src="${product.image || 'https://via.placeholder.com/200'}" 
+                                 alt="${product.name}" 
+                                 class="product_picture">
+                            
+                            <!-- Содержимое карточки -->
+                            <div class="product_content">
+                                <!-- Цена товара -->
+                                <div class="product_price">${product.price}$</div>
+                                
+                                <!-- Название товара -->
+                                <div class="product_description">${product.name}</div>
+                                
+                                <!-- Кнопка добавления в корзину -->
+                                <button class="add_to_basket_button" data-product-id="${product.id}">
+                                    В корзину
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    // Присоединяем обработчики к кнопкам
+                    attachButtonHandlers();
+                });
+            });
+            
+            // ===== ПРОВЕРКА СТАТУСА АВТОРИЗАЦИИ =====
+            // Определяем, какие меню показывать
+            checkAuthStatus();
+        });
+
+        // ===== ЗАГРУЗКА ВСЕХ ТОВАРОВ =====
+        /**
+         * Функция загружает список всех товаров с сервера
+         * и отображает их в виде карточек
+         */
+        function loadProducts() {
+            fetch('/api/products')
+            .then(response => response.json())
+            .then(data => {
+                const mainBody = document.querySelector('.main_body');
+                
+                // Если товаров нет, показываем сообщение
+                if (data.products.length === 0) {
+                    mainBody.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px;">Товары не найдены</p>';
+                    return;
+                }
+                
+                // Генерируем HTML для каждого товара
+                mainBody.innerHTML = data.products.map(product => `
+                    <div class="product_card">
+                        <!-- Изображение товара -->
+                        <img src="${product.image || 'https://via.placeholder.com/200'}" 
+                             alt="${product.name}" 
+                             class="product_picture">
+                        
+                        <!-- Содержимое карточки -->
+                        <div class="product_content">
+                            <!-- Цена товара -->
+                            <div class="product_price">${product.price}$</div>
+                            
+                            <!-- Название товара -->
+                            <div class="product_description">${product.name}</div>
+                            
+                            <!-- Кнопка добавления в корзину -->
+                            <button class="add_to_basket_button" data-product-id="${product.id}">
+                                В корзину
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+                
+                // Присоединяем обработчики к кнопкам
+                attachButtonHandlers();
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки товаров:', error);
+            });
+        }
+
+        // ===== ДОБАВЛЕНИЕ В КОРЗИНУ =====
+        /**
+         * Функция обрабатывает клик по кнопке "В корзину"
+         * @param {number} productId - ID товара для добавления
+         */
+        function addToBasket(productId) {
+            fetch('/api/basket/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    product_id: parseInt(productId), 
+                    quantity: 1 
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Успешно добавлено в корзину
+                    alert('✓ Товар добавлен в корзину!');
+                } else if (response.status === 401) {
+                    // Пользователь не авторизован
+                    alert('❌ Пожалуйста, войдите в систему для добавления товара в корзину');
+                    window.location.href = '/signin';
+                } else {
+                    alert('❌ Ошибка при добавлении в корзину');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('❌ Ошибка при добавлении в корзину');
+            });
+        }
+
+        // ===== ПРИСОЕДИНЕНИЕ ОБРАБОТЧИКОВ К КНОПКАМ =====
+        /**
+         * Функция присоединяет обработчики клика ко всем кнопкам "В корзину"
+         */
+        function attachButtonHandlers() {
+            const buttons = document.querySelectorAll('.add_to_basket_button');
+            buttons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = this.getAttribute('data-product-id');
+                    addToBasket(productId);
+                });
+            });
+        }
+
+        // ===== ПРОВЕРКА СТАТУСА АВТОРИЗАЦИИ =====
+        /**
+         * Функция проверяет, авторизован ли пользователь
+         * и показывает/скрывает соответствующие меню
+         */
+        function checkAuthStatus() {
+            fetch('/check-admin')
+            .then(response => response.json())
+            .then(data => {
+                // Если пользователь авторизован
+                if (data.authenticated !== false) {
+                    document.getElementById('signin-link').style.display = 'none';
+                    document.getElementById('basket-link').style.display = 'block';
+                    document.getElementById('logout-link').style.display = 'block';
+                    
+                    // Если пользователь администратор
+                    if (data.is_admin) {
+                        document.getElementById('admin-link').style.display = 'block';
+                    }
+                }
+            });
+        }
+
+        // ===== ВЫХОД ИЗ СИСТЕМЫ =====
+        /**
+         * Функция выполняет выход из системы
+         * и перенаправляет на главную страницу
+         */
+        function logout() {
+            window.location.href = '/logout';
+        }
+    </script>
 </body>
 </html>

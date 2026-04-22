@@ -1,31 +1,72 @@
+<!-- ==========================================
+     FIND & FOUND - СТРАНИЦА РЕГИСТРАЦИИ
+     Форма для создания новой учетной записи
+     ========================================== -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
+    <!-- Мета-информация о странице -->
     <meta charset="UTF-8">
-    <title>Find & Foud</title>
-    <!--подключение css файла с стилями-->
-    <link rel="stylesheet" href="main.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация - Find & Found</title>
+    
+    <!-- Подключение CSS стилей -->
+    <link rel="stylesheet" href="static/main.css">
 </head>
-<header>
-    <a href="" class="header_item">Find & Found</a>
-    <div style="display: flex; gap: 20px;">
-        <a href="/signup" class="header_item">sign in</a>
-        <a href="" class="header_item">basket</a>
-    </div>
-</header>
 <body>
+    <!-- НАВИГАЦИЯ И ЗАГОЛОВОК -->
+    <header>
+        <!-- Логотип -->
+        <a href="/" class="header_item">🏪 Find & Found</a>
+        
+        <!-- МЕНЮ НАВИГАЦИИ -->
+        <div style="display: flex; gap: 20px;">
+            <!-- Ссылка на вход -->
+            <a href="/signin" class="header_item">Войти</a>
+            
+            <!-- Ссылка на главную -->
+            <a href="/" class="header_item">На главную</a>
+        </div>
+    </header>
+
+    <!-- КОНТЕЙНЕР ФОРМЫ РЕГИСТРАЦИИ -->
     <div class="login_card">
-        <h1>Sign Up</h1>
-        <form id="loginForm">
+        <!-- ЗАГОЛОВОК -->
+        <h1>Создать аккаунт</h1>
+        
+        <!-- ФОРМА РЕГИСТРАЦИИ -->
+        <form action="/signup" method="post">
+            <!-- ПОЛЕ ВВОДА ИМЕНИ ПОЛЬЗОВАТЕЛЯ -->
             <div class="input-group">
-                <input type="text" id="password" placeholder="Username" autocomplete="currect-password" required>
+                <label for="username">Имя пользователя</label>
+                <input type="text" 
+                       id="username"
+                       name="username" 
+                       placeholder="Выберите имя пользователя" 
+                       autocomplete="username" 
+                       required>
             </div>
+            
+            <!-- ПОЛЕ ВВОДА ПАРОЛЯ -->
             <div class="input-group">
-                <input type="password" id="password" placeholder="Password" autocomplete="current-password" required>
+                <label for="password">Пароль</label>
+                <input type="password" 
+                       id="password"
+                       name="password" 
+                       placeholder="Введите пароль (минимум 6 символов)" 
+                       autocomplete="new-password" 
+                       required
+                       minlength="6">
             </div>
-            <button type="submit" class="signin_btn">Sign Up</button>
+            
+            <!-- КНОПКА РЕГИСТРАЦИИ -->
+            <button type="submit" class="signin_btn">Зарегистрироваться</button>
+            
+            <!-- ССЫЛКА НА ВХОД -->
+            <div class="register_link" style="margin-top: 20px;">
+                <p>Уже есть аккаунт? <a href="/signin">Войти</a></p>
+            </div>
         </form>
-</div>
     </div>
 </body>
 </html>

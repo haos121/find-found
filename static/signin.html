@@ -1,35 +1,99 @@
+<!-- ==========================================
+     FIND & FOUND - СТРАНИЦА ВХОДА
+     Форма для авторизации пользователей
+     ========================================== -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
+    <!-- Мета-информация о странице -->
     <meta charset="UTF-8">
-    <title>Find & Foud</title>
-    <!--подключение css файла с стилями-->
-    <link rel="stylesheet" href="main.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход - Find & Found</title>
+    
+    <!-- Подключение CSS стилей -->
+    <link rel="stylesheet" href="static/main.css">
+    
+    <!-- Подключение иконок BoxIcons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 </head>
 <body>
-    <div class="wrapper">
-        <form action="">
-            <h1>Login</h1>
-        <div class="input_box">
-            <input type="text" placeholder="Username" required>
-            <i class='bx bxs-user'></i>
-        </div>
-        <div class="input_box">
-            <input type="password" placeholder="Password" required>
-            <i class='bx bxs-lock-alt' ></i>
-        </div>
-        <div class="remember">
-            <label for="checkbox">Запомнить</label>
-            <a href="#">Забыли пароль?</a>
-        </div>
+    <!-- КОНТЕЙНЕР ФОРМЫ ВХОДА -->
+    <div class="sign_in_container">
+        <!-- ФОРМА ВХОДА -->
+        <div class="wrapper">
+            <!-- ЗАГОЛОВОК ФОРМЫ -->
+            <form onsubmit="signin(event)">
+                <h1>Вход в систему</h1>
+                
+                <!-- ПОЛЕ ВВОДА ИМЕНИ ПОЛЬЗОВАТЕЛЯ -->
+                <div class="input_box">
+                    <input type="text" 
+                           id="username" 
+                           placeholder="Имя пользователя" 
+                           required>
+                    <!-- Иконка пользователя -->
+                    <i class='bx bxs-user'></i>
+                </div>
+                
+                <!-- ПОЛЕ ВВОДА ПАРОЛЯ -->
+                <div class="input_box">
+                    <input type="password" 
+                           id="password" 
+                           placeholder="Пароль" 
+                           required>
+                    <!-- Иконка замка -->
+                    <i class='bx bxs-lock-alt'></i>
+                </div>
+                
+                <!-- КНОПКА ВХОДА -->
+                <button type="submit" class="btn">Войти</button>
 
-        <button type="submit" class="btn">Войти</button>
-
-        <div class="register_link">
-            <p>Нет аккаунта? <a href="#">Register</a></p>
+                <!-- ССЫЛКА НА РЕГИСТРАЦИЮ -->
+                <div class="register_link">
+                    <p>Нет аккаунта? <a href="/signup">Зарегистрироваться</a></p>
+                </div>
+            </form>
         </div>
-        </form>
     </div>
+
+    <script>
+        // ===== ФУНКЦИЯ ВХОДА =====
+        /**
+         * Функция отправляет данные входа на сервер
+         * и перенаправляет на главную страницу при успехе
+         * @param {Event} event - событие отправки формы
+         */
+        function signin(event) {
+            event.preventDefault();
+            
+            // Получаем значения из поля ввода
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Отправляем запрос на сервер
+            fetch('/signin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({
+                    username: username,
+                    password: password
+                })
+            })
+            .then(response => {
+                // Если редирект произошел успешно, переходим на главную
+                if (response.status === 302 || response.url !== window.location.href) {
+                    window.location.href = '/';
+                } else {
+                    alert('❌ Ошибка входа: проверьте имя пользователя и пароль');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('❌ Ошибка при входе');
+            });
+        }
+    </script>
 </body>
 </html>

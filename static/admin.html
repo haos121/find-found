@@ -1,0 +1,269 @@
+<!-- ==========================================
+     FIND & FOUND - АДМИНИСТРАТОРСКАЯ ПАНЕЛЬ
+     Управление товарами и пользователями
+     ========================================== -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <!-- Мета-информация о странице -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель - Find & Found</title>
+    
+    <!-- Подключение CSS стилей -->
+    <link rel="stylesheet" href="static/main.css">
+</head>
+<body>
+    <!-- НАВИГАЦИЯ И ЗАГОЛОВОК -->
+    <header>
+        <!-- Логотип -->
+        <a href="/" class="header_item">🏪 Find & Found</a>
+        
+        <!-- МЕНЮ НАВИГАЦИИ -->
+        <div style="display: flex; gap: 20px;">
+            <!-- Ссылка на каталог -->
+            <a href="/" class="header_item">📦 На главную</a>
+            
+            <!-- Кнопка выхода -->
+            <a href="#" onclick="logout()" class="header_item">Выход</a>
+        </div>
+    </header>
+
+    <!-- ОСНОВНОЙ КОНТЕНТ АДМИН-ПАНЕЛИ -->
+    <div class="admin_container">
+        <!-- ЗАГОЛОВОК -->
+        <h1>⚙️ Панель администратора</h1>
+        <p>Добро пожаловать в административную панель Find & Found!</p>
+
+        <!-- ===== СЕКЦИЯ ДОБАВЛЕНИЯ ТОВАРА ===== -->
+        <div class="admin_section">
+            <h2>Добавить новый товар</h2>
+            
+            <!-- ФОРМА ДОБАВЛЕНИЯ ТОВАРА -->
+            <form onsubmit="addProduct(event)" class="product_form">
+                <!-- ПОЛЕ НАЗВАНИЯ ТОВАРА -->
+                <div class="form_group">
+                    <label for="productName">Название товара</label>
+                    <input type="text" 
+                           id="productName" 
+                           placeholder="Введите название товара" 
+                           required>
+                </div>
+                
+                <!-- ПОЛЕ ЦЕНЫ ТОВАРА -->
+                <div class="form_group">
+                    <label for="productPrice">Цена (в долларе)</label>
+                    <input type="number" 
+                           id="productPrice" 
+                           placeholder="Введите цену" 
+                           step="0.01" 
+                           min="0"
+                           required>
+                </div>
+                
+                <!-- ПОЛЕ ВЫБОРА ИЗОБРАЖЕНИЯ -->
+                <div class="form_group">
+                    <label for="productImage">Изображение товара</label>
+                    <input type="file" 
+                           id="productImage" 
+                           accept="image/*" 
+                           placeholder="Выберите изображение">
+                    <small style="color: #7f8c8d;">Поддерживаются форматы: JPG, PNG, WebP</small>
+                </div>
+                
+                <!-- КНОПКА ДОБАВЛЕНИЯ -->
+                <button type="submit" class="add_to_basket_button">Добавить товар</button>
+            </form>
+        </div>
+
+        <!-- ===== СЕКЦИЯ ПОЛЬЗОВАТЕЛЕЙ ===== -->
+        <div class="admin_section">
+            <h2>👥 Зарегистрированные пользователи</h2>
+            
+            <!-- СПИСОК ПОЛЬЗОВАТЕЛЕЙ -->
+            <div id="users" class="users_list">
+                <!-- Здесь будут загружены пользователи через JavaScript -->
+            </div>
+        </div>
+
+        <!-- ===== СЕКЦИЯ ТОВАРОВ ===== -->
+        <div class="admin_section">
+            <h2>📦 Список товаров</h2>
+            
+            <!-- СЕТКА ТОВАРОВ -->
+            <div id="products" class="products_grid">
+                <!-- Здесь будут загружены товары через JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== ИНИЦИАЛИЗАЦИЯ СТРАНИЦЫ =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Загружаем пользователей
+            loadUsers();
+            
+            // Загружаем товары
+            loadProducts();
+        });
+
+        // ===== ЗАГРУЗКА СПИСКА ПОЛЬЗОВАТЕЛЕЙ =====
+        /**
+         * Функция загружает список всех зарегистрированных пользователей
+         */
+        function loadUsers() {
+            fetch('/admin/users')
+            .then(response => response.json())
+            .then(data => {
+                const usersDiv = document.getElementById('users');
+                
+                // Если пользователей нет
+                if (data.users.length === 0) {
+                    usersDiv.innerHTML = '<p>Нет зарегистрированных пользователей</p>';
+                    return;
+                }
+                
+                // Генерируем HTML список пользователей
+                usersDiv.innerHTML = '<ul>' + 
+                    data.users.map(user => `<li>👤 ${user.username}</li>`).join('') + 
+                    '</ul>';
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки пользователей:', error);
+            });
+        }
+
+        // ===== ЗАГРУЗКА ТОВАРОВ =====
+        /**
+         * Функция загружает список всех товаров
+         * и отображает их в виде карточек с кнопками удаления
+         */
+        function loadProducts() {
+            fetch('/api/products')
+            .then(response => response.json())
+            .then(data => {
+                const productsDiv = document.getElementById('products');
+                
+                // Если товаров нет
+                if (data.products.length === 0) {
+                    productsDiv.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">Нет товаров</p>';
+                    return;
+                }
+                
+                // Генерируем HTML карточку для каждого товара
+                productsDiv.innerHTML = data.products.map(p => `
+                    <div class="admin_product_card">
+                        <!-- Изображение товара -->
+                        <img src="${p.image || 'https://via.placeholder.com/200'}" 
+                             alt="${p.name}" 
+                             class="admin_product_img">
+                        
+                        <!-- Информация о товаре -->
+                        <div class="admin_product_info">
+                            <!-- Название товара -->
+                            <p class="admin_product_name">${p.name}</p>
+                            
+                            <!-- Цена товара -->
+                            <p class="admin_product_price">$${p.price}</p>
+                            
+                            <!-- КНОПКА УДАЛЕНИЯ -->
+                            <button onclick="deleteProduct(${p.id})" class="remove_btn" style="width: 100%;">
+                                🗑️ Удалить
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки товаров:', error);
+            });
+        }
+
+        // ===== ДОБАВЛЕНИЕ ТОВАРА =====
+        /**
+         * Функция обрабатывает форму добавления товара
+         * Отправляет данные на сервер с файлом изображения
+         * @param {Event} event - событие отправки формы
+         */
+        function addProduct(event) {
+            event.preventDefault();
+            
+            // Получаем данные из формы
+            const name = document.getElementById('productName').value;
+            const price = document.getElementById('productPrice').value;
+            const imageFile = document.getElementById('productImage').files[0];
+            
+            // Создаем FormData для отправки файла
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('price', price);
+            if (imageFile) {
+                formData.append('image', imageFile);
+            }
+            
+            // Отправляем запрос на сервер
+            fetch('/api/products', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Успешно добавлено
+                alert('✓ Товар успешно добавлен!');
+                
+                // Очищаем форму
+                document.getElementById('productName').value = '';
+                document.getElementById('productPrice').value = '';
+                document.getElementById('productImage').value = '';
+                
+                // Перезагружаем список товаров
+                loadProducts();
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('❌ Ошибка при добавлении товара');
+            });
+        }
+
+        // ===== УДАЛЕНИЕ ТОВАРА =====
+        /**
+         * Функция удаляет товар из каталога
+         * @param {number} productId - ID товара для удаления
+         */
+        function deleteProduct(productId) {
+            // Запрашиваем подтверждение
+            if (!confirm('Вы уверены, что хотите удалить этот товар?')) {
+                return;
+            }
+            
+            // Отправляем запрос на удаление
+            fetch('/api/products/' + productId, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Успешно удалено
+                    alert('✓ Товар удален');
+                    
+                    // Перезагружаем список товаров
+                    loadProducts();
+                } else {
+                    alert('❌ Ошибка при удалении товара');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('❌ Ошибка при удалении товара');
+            });
+        }
+
+        // ===== ВЫХОД ИЗ СИСТЕМЫ =====
+        /**
+         * Функция выполняет выход из системы
+         */
+        function logout() {
+            window.location.href = '/logout';
+        }
+    </script>
+</body>
+</html></content>

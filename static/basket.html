@@ -1,0 +1,207 @@
+<!-- ==========================================
+     FIND & FOUND - СТРАНИЦА КОРЗИНЫ
+     Отображение товаров в корзине покупателя
+     ========================================== -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <!-- Мета-информация о странице -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Корзина - Find & Found</title>
+    
+    <!-- Подключение CSS стилей -->
+    <link rel="stylesheet" href="static/main.css">
+</head>
+<body>
+    <!-- НАВИГАЦИЯ И ЗАГОЛОВОК -->
+    <header>
+        <!-- Логотип -->
+        <a href="/" class="header_item">🏪 Find & Found</a>
+        
+        <!-- МЕНЮ НАВИГАЦИИ -->
+        <div style="display: flex; gap: 20px;">
+            <!-- Ссылка на каталог -->
+            <a href="/" class="header_item">📦 Товары</a>
+            
+            <!-- Текущая страница (корзина) -->
+            <a href="/basket" class="header_item" style="color: #3498db;">🛒 Корзина</a>
+            
+            <!-- Ссылка на админ-панель (видна только администратору) -->
+            <a href="/admin" class="header_item" id="admin-link" style="display: none;">⚙️ Админ</a>
+            
+            <!-- Кнопка выхода -->
+            <a href="#" onclick="logout()" class="header_item">Выход</a>
+        </div>
+    </header>
+
+    <!-- ОСНОВНОЙ КОНТЕНТ КОРЗИНЫ -->
+    <div class="basket_container">
+        <!-- ЗАГОЛОВОК -->
+        <h1 class="basket_title">🛒 Ваша корзина</h1>
+        
+        <!-- СПИСОК ТОВАРОВ В КОРЗИНЕ -->
+        <div id="basket_items" class="basket_items">
+            <!-- Здесь будут загружены товары через JavaScript -->
+        </div>
+        
+        <!-- ИТОГОВАЯ СТОИМОСТЬ И КНОПКА ОФОРМЛЕНИЯ -->
+        <div class="basket_summary">
+            <!-- Показываем общую сумму -->
+            <h2>Итого: <span id="total" style="color: #27ae60;">$0</span></h2>
+            
+            <!-- Кнопка оформления заказа -->
+            <button onclick="checkout()" class="add_to_basket_button" style="width: 200px;">Оформить заказ</button>
+        </div>
+    </div>
+
+    <script>
+        // ===== ИНИЦИАЛИЗАЦИЯ СТРАНИЦЫ =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Проверяем статус администратора
+            checkAdminStatus();
+            
+            // Загружаем товары в корзину
+            loadBasket();
+        });
+
+        // ===== ЗАГРУЗКА ТОВАРОВ КОРЗИНЫ =====
+        /**
+         * Функция загружает товары текущего пользователя из корзины
+         * и отображает их на странице
+         */
+        function loadBasket() {
+            fetch('/api/basket')
+            .then(response => response.json())
+            .then(data => {
+                const basketItems = document.getElementById('basket_items');
+                
+                // Если корзина пустая
+                if (data.basket.length === 0) {
+                    basketItems.innerHTML = '<p style="text-align: center; padding: 40px; grid-column: 1/-1;">🛒 Ваша корзина пустая</p>';
+                    document.getElementById('total').textContent = '$0';
+                    return;
+                }
+                
+                // Считаем общую стоимость и генерируем HTML
+                let total = 0;
+                basketItems.innerHTML = data.basket.map(item => {
+                    // Вычисляем стоимость товара
+                    total += item.price * item.quantity;
+                    
+                    return `
+                        <div class="basket_item">
+                            <!-- Изображение товара -->
+                            <img src="${item.image || 'https://via.placeholder.com/80'}" 
+                                 alt="${item.name}" 
+                                 class="basket_img">
+                            
+                            <!-- Информация о товаре -->
+                            <div class="basket_info">
+                                <!-- Название товара -->
+                                <p class="basket_name">${item.name}</p>
+                                
+                                <!-- Цена товара -->
+                                <p class="basket_price">$${item.price}</p>
+                                
+                                <!-- Количество товара -->
+                                <p style="color: #7f8c8d;">Количество: ${item.quantity}</p>
+                            </div>
+                            
+                            <!-- КНОПКА УДАЛЕНИЯ -->
+                            <div class="basket_actions">
+                                <button onclick="removeItem(${item.id})" class="remove_btn">
+                                    Удалить
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                // Обновляем общую стоимость
+                document.getElementById('total').textContent = '$' + total.toFixed(2);
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки корзины:', error);
+                document.getElementById('basket_items').innerHTML = '<p style="color: red;">Ошибка загрузки корзины</p>';
+            });
+        }
+
+        // ===== УДАЛЕНИЕ ТОВАРА ИЗ КОРЗИНЫ =====
+        /**
+         * Функция удаляет товар из корзины
+         * @param {number} itemId - ID товара в корзине
+         */
+        function removeItem(itemId) {
+            // Запрашиваем подтверждение
+            if (!confirm('Вы уверены, что хотите удалить этот товар?')) {
+                return;
+            }
+            
+            // Отправляем запрос на удаление
+            fetch('/api/basket/' + itemId, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Перезагружаем корзину
+                    loadBasket();
+                } else {
+                    alert('❌ Ошибка при удалении товара');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('❌ Ошибка при удалении товара');
+            });
+        }
+
+        // ===== ОФОРМЛЕНИЕ ЗАКАЗА =====
+        /**
+         * Функция обрабатывает оформление заказа
+         * (в демо-версии просто очищает корзину)
+         */
+        function checkout() {
+            alert('✓ Спасибо за покупку! Это демо-версия магазина.');
+            
+            // Получаем все товары в корзине
+            fetch('/api/basket')
+            .then(response => response.json())
+            .then(data => {
+                // Удаляем каждый товар из корзины
+                data.basket.forEach(item => {
+                    fetch('/api/basket/' + item.id, { 
+                        method: 'DELETE' 
+                    });
+                });
+                
+                // Перезагружаем корзину
+                setTimeout(() => loadBasket(), 500);
+            });
+        }
+
+        // ===== ПРОВЕРКА СТАТУСА АДМИНИСТРАТОРА =====
+        /**
+         * Функция проверяет, является ли пользователь администратором
+         * и показывает/скрывает ссылку на админ-панель
+         */
+        function checkAdminStatus() {
+            fetch('/check-admin')
+            .then(response => response.json())
+            .then(data => {
+                if (data.is_admin) {
+                    document.getElementById('admin-link').style.display = 'block';
+                }
+            });
+        }
+
+        // ===== ВЫХОД ИЗ СИСТЕМЫ =====
+        /**
+         * Функция выполняет выход из системы
+         */
+        function logout() {
+            window.location.href = '/logout';
+        }
+    </script>
+</body>
+</html>
