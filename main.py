@@ -152,11 +152,7 @@ def hash_password(password: str):
         str: Хешированный пароль
     """
     # Сначала хешируем с SHA256
-    password_bytes = password.encode("utf-8")
-    hashed = hashlib.sha256(password_bytes).digest()
-    
-    # Затем применяем bcrypt
-    return pwd_context.hash(hashed)
+    return pwd_context.hash(password)
 
 def verify_password(plain_password, hashed_password):
     """
@@ -169,12 +165,9 @@ def verify_password(plain_password, hashed_password):
     Returns:
         bool: True если пароли совпадают, False иначе
     """
-    # Хешируем открытый пароль
-    password_bytes = plain_password.encode("utf-8")
-    hashed = hashlib.sha256(password_bytes).digest()
     
     # Проверяем с хешированным паролем из БД
-    return pwd_context.verify(hashed, hashed_password)
+    return pwd_context.verify(plain_password, hashed_password)
 
 # ===== ИНИЦИАЛИЗАЦИЯ БАЗЫ ДАННЫХ =====
 
